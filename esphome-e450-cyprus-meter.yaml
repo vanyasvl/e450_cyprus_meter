@@ -1,0 +1,158 @@
+---
+esphome:
+  name: e450-cyprus-meter
+  friendly_name: E450 Cyprus Meter
+
+esp32:
+  board: esp32-c6-devkitm-1
+  variant: esp32c6
+  framework:
+    type: esp-idf
+
+logger:
+  level: INFO
+  hardware_uart: USB_SERIAL_JTAG
+
+api:
+
+web_server:
+  port: 80
+
+ota:
+  platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: "E450 AP"
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+external_components:
+  - source: github://vanyasvl/e450_cyprus_meter@master
+    components: [e450_cyprus_meter]
+
+# Connect the M-Bus TTL adapter TX/data output to GPIO0 and share GND.
+# The Landis+Gyr E450 CII side is M-Bus signalling; use a real M-Bus-to-UART
+# interface such as a TSS721-based adapter, not direct meter-to-GPIO wiring.
+uart:
+  id: mbus_uart
+  rx_pin: GPIO0
+  baud_rate: 2400
+  data_bits: 8
+  parity: NONE
+  stop_bits: 1
+  rx_buffer_size: 2048
+
+e450_cyprus_meter:
+  id: meter
+  uart_id: mbus_uart
+  frame_timeout: 1500ms
+  validate_crc: true
+
+  push_timestamp:
+    id: push_timestamp
+    name: Push Timestamp
+  meter_clock:
+    id: meter_clock
+    name: Meter Clock
+  energy_push_timestamp:
+    id: energy_push_timestamp
+    name: Energy Push Timestamp
+  meter_logical_device_name:
+    id: meter_logical_device_name
+    name: Logical Device Name
+  meter_serial_number:
+    id: meter_serial_number
+    name: Serial Number
+  active_tariff:
+    id: active_tariff
+    name: Active Tariff
+
+  active_power_import_l1:
+    id: active_power_import_l1
+    name: Active Power Import L1
+  active_power_import_l2:
+    id: active_power_import_l2
+    name: Active Power Import L2
+  active_power_import_l3:
+    id: active_power_import_l3
+    name: Active Power Import L3
+  active_power_export_l1:
+    id: active_power_export_l1
+    name: Active Power Export L1
+  active_power_export_l2:
+    id: active_power_export_l2
+    name: Active Power Export L2
+  active_power_export_l3:
+    id: active_power_export_l3
+    name: Active Power Export L3
+  active_power_import_total:
+    id: active_power_import_total
+    name: Active Power Import Total
+  active_power_export_total:
+    id: active_power_export_total
+    name: Active Power Export Total
+  reactive_power_import:
+    id: reactive_power_import
+    name: Reactive Power Import
+  reactive_power_export:
+    id: reactive_power_export
+    name: Reactive Power Export
+  power_factor:
+    id: power_factor
+    name: Power Factor
+  current_l1:
+    id: current_l1
+    name: Current L1
+  current_l2:
+    id: current_l2
+    name: Current L2
+  current_l3:
+    id: current_l3
+    name: Current L3
+  voltage_l1:
+    id: voltage_l1
+    name: Voltage L1
+  voltage_l2:
+    id: voltage_l2
+    name: Voltage L2
+  voltage_l3:
+    id: voltage_l3
+    name: Voltage L3
+  frequency:
+    id: frequency
+    name: Frequency
+  disconnect_control_state:
+    id: disconnect_control_state
+    name: Disconnect Control State
+
+  active_energy_import_t1:
+    id: active_energy_import_t1
+    name: Active Energy Import T1
+  active_energy_import_t2:
+    id: active_energy_import_t2
+    name: Active Energy Import T2
+  active_energy_export_t1:
+    id: active_energy_export_t1
+    name: Active Energy Export T1
+  active_energy_export_t2:
+    id: active_energy_export_t2
+    name: Active Energy Export T2
+  active_energy_import_total:
+    id: active_energy_import_total
+    name: Active Energy Import Total
+  active_energy_export_total:
+    id: active_energy_export_total
+    name: Active Energy Export Total
+  reactive_energy_import:
+    id: reactive_energy_import
+    name: Reactive Energy Import
+  reactive_energy_export:
+    id: reactive_energy_export
+    name: Reactive Energy Export
+  disconnect_limiter_state:
+    id: disconnect_limiter_state
+    name: Disconnect Limiter State

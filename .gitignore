@@ -1,0 +1,22 @@
+secrets.yaml
+
+# ESPHome local build/cache output
+.esphome/
+build/
+
+# Native test build output
+tests/build/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local virtual environments
+.venv/
+venv/
+
+# OS/editor noise
+.DS_Store
+.idea/
+.vscode/

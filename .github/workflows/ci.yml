@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cpp-tests:
+    name: Native C++ tests
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6.0.3
+
+      - name: Install compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang
+
+      - name: Run native decoder tests
+        run: tests/run_cpp_tests.sh
+
+  esphome-compile:
+    name: ESPHome compile
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6.0.3
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            python3-dev \
+            python3-venv
+
+      - name: Install ESPHome
+        run: |
+          python3 -m venv .venv-ci
+          .venv-ci/bin/pip install --upgrade pip==26.1.2
+          .venv-ci/bin/pip install esphome==2026.6.0
+
+      - name: Create CI secrets
+        run: |
+          cat > secrets.yaml <<'EOF'
+          wifi_ssid: "ci-wifi"
+          wifi_password: "ci-password"
+          fallback_ap_password: "ci-password"
+          EOF
+
+      - name: Use checked-out component source
+        run: |
+          .venv-ci/bin/python - <<'PY'
+          from pathlib import Path
+
+          path = Path("esphome-e450-cyprus-meter.yaml")
+          text = path.read_text()
+          text = text.replace(
+              "  - source: github://vanyasvl/e450_cyprus_meter@master\n"
+              "    components: [e450_cyprus_meter]",
+              "  - source:\n"
+              "      type: local\n"
+              "      path: components\n"
+              "    components: [e450_cyprus_meter]",
+          )
+          path.write_text(text)
+          PY
+
+      - name: Compile ESPHome config
+        run: .venv-ci/bin/esphome compile esphome-e450-cyprus-meter.yaml
